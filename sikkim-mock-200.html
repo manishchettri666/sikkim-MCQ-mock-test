@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Sikkim GK & Current Affairs — 200 Question Mock Test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{--bg:#f7fafc;--card:#fff;--muted:#64748b;--accent:#0ea5a4;}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; margin:0; background:var(--bg); color:#0f172a;}
+  header{padding:18px 20px; background:linear-gradient(90deg,#ffffff 0%, #f1f5f9 100%); border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  header h1{font-size:1.05rem; margin:0;}
+  header .meta{font-size:0.92rem; color:var(--muted);}
+  main{display:flex; gap:18px; padding:18px; max-width:1200px; margin:0 auto;}
+  /* Sidebar */
+  #sidebar{width:220px; background:var(--card); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); height:76vh; overflow:auto; position:sticky; top:18px;}
+  #questionNumbers{display:flex; flex-wrap:wrap; gap:6px;}
+  .qnum{width:38px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer; background:#fff;}
+  .qnum.current{outline:3px solid rgba(14,165,164,0.12); border-color:var(--accent);}
+  .qnum.answered{background:#d1fae5; border-color:#6ee7b7;}
+  .qnum.flagged{background:#fde68a;}
+  #sidebar h3{margin:0 0 8px 0; font-size:0.95rem;}
+  #sidebar .info{font-size:0.85rem; color:var(--muted); margin-top:8px;}
+  /* Main area */
+  #main-area{flex:1; background:var(--card); padding:18px; border-radius:10px; box-shadow:0 6px 18px rgba(2,6,23,0.06); min-height:76vh; display:flex; flex-direction:column;}
+  #topbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;}
+  #timer{font-weight:700; color:#b91c1c;}
+  #progress{color:var(--muted); font-size:0.92rem;}
+  #question-wrap{flex:1; overflow:auto; padding-right:6px;}
+  .question-card{padding:12px; border-radius:8px; border:1px solid #e6eef6; background:linear-gradient(180deg,#fff,#fbfdff); }
+  .question-head{font-size:1.05rem; margin-bottom:12px;}
+  .options{display:flex; flex-direction:column; gap:8px;}
+  .opt-btn{padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; text-align:left; cursor:pointer; font-size:0.98rem;}
+  .opt-btn:hover{transform:translateY(-1px); box-shadow:0 4px 14px rgba(2,6,23,0.06);}
+  .opt-btn.correct{background:#16a34a; color:#fff; border-color:#16a34a;}
+  .opt-btn.wrong{background:#dc2626; color:#fff; border-color:#dc2626;}
+  .controls{display:flex; gap:8px; align-items:center; margin-top:14px;}
+  button.primary{background:var(--accent); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;}
+  button.ghost{background:#fff; border:1px solid #cbd5e1; padding:8px 12px; border-radius:8px; cursor:pointer;}
+  .small{font-size:0.88rem; color:var(--muted);}
+  footer{padding:12px 18px; text-align:center; color:var(--muted);}
+  @media (max-width:980px){
+    main{flex-direction:column; padding:12px;}
+    #sidebar{width:100%; height:auto; position:static;}
+    #main-area{min-height:unset;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sikkim — GK & Current Affairs (200 Qs)</h1>
+  <div class="meta">
+    Total Questions: <strong>200</strong> &nbsp;|&nbsp; Total Marks: <strong>150</strong> &nbsp;|&nbsp; Time: <strong>2 hours</strong>
+  </div>
+</header>
+
+<main>
+  <!-- Sidebar with numbers -->
+  <aside id="sidebar">
+    <h3>Question Tracker</h3>
+    <div id="questionNumbers"></div>
+    <div class="info">
+      <div class="small">Green = answered correct, Yellow = flagged, Light green = answered (marked)</div>
+      <div style="margin-top:8px;"><button class="ghost" onclick="toggleFlag()">Flag/Unflag Q</button> <button class="ghost" onclick="resetAnswers()">Reset Answers</button></div>
+    </div>
+  </aside>
+
+  <!-- Main test area -->
+  <section id="main-area">
+    <div id="topbar">
+      <div id="progress"><span id="currentIndex">1</span> / 200</div>
+      <div id="timer">Time Left: 120:00</div>
+    </div>
+
+    <div id="question-wrap">
+      <div class="question-card" id="questionCard">
+        <!-- question inserted here -->
+      </div>
+    </div>
+
+    <div class="controls" style="justify-content:space-between;">
+      <div>
+        <button class="ghost" onclick="prevQuestion()">Previous</button>
+        <button class="ghost" onclick="nextQuestion()">Next</button>
+      </div>
+      <div>
+        <button class="primary" onclick="submitTest()">Submit</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Tip: Correct selections auto-advance. Wrong selections show red — then use Next to continue.
+</footer>
+
+<script>
+/* ========== QUESTIONS ARRAY (200) ========== 
+   Each item: { q: "question", options: ["a","b","c","d"], answer: index }
+   --- All questions below focus on Sikkim GK & Current Affairs / development / history / culture ---
+*/
+const questions = [
+  {q:"1. What is the capital city of Sikkim?", options:["Namchi","Gangtok","Mangan","Gyalshing"], answer:1},
+  {q:"2. In which year did Sikkim become the 22nd State of India?", options:["1971","1975","1985","1967"], answer:1},
+  {q:"3. Which major peak lies on the border of Sikkim and is the third-highest mountain in the world?", options:["Nanda Devi","Annapurna","Kangchenjunga","Lhotse"], answer:2},
+  {q:"4. Which airport serves Sikkim with flights directly into the state (operational in recent years)?", options:["Pakyong Airport","Siliguri Airport","Bagdogra Airport","Gephel Airport"], answer:0},
+  {q:"5. Sikkim is known for promoting which type of agriculture statewide?", options:["Conventional cotton farming","High-input chemical farming","Organic farming","Hydroponic farming"], answer:2},
+  {q:"6. Which river originates in Sikkim and is a major tributary of the Teesta?", options:["Rangpo","Rangit","Donga","Lachen"], answer:1},
+  {q:"7. Name the popular high-altitude tourist destination in North Sikkim famous for lakes and alpine landscape.", options:["Gurudongmar Lake","Tsomgo Lake","Rabdentse","Namchi"], answer:0},
+  {q:"8. Which of these is a famous monastery (gompa) in Sikkim near Gangtok?", options:["Rumtek Monastery","Tawang Monastery","Thiksey Monastery","Hemis Monastery"], answer:0},
+  {q:"9. Which crop has traditionally been a major cash crop of Sikkim (noted for both domestic market and export)?", options:["Tea","Cardamom","Wheat","Cotton"], answer:1},
+  {q:"10. Sikkim shares an international border with which country to the north and east?", options:["Nepal","Bhutan","China (Tibet)","Myanmar"], answer:2},
+
+  {q:"11. Which district is Gangtok located in?", options:["East Sikkim","West Sikkim","North Sikkim","South Sikkim"], answer:0},
+  {q:"12. What is the vehicle registration code prefix for Sikkim?", options:["SK","SM","SG","SI"], answer:0},
+  {q:"13. Which state/region lies to the south of Sikkim?", options:["West Bengal","Assam","Nepal","Bhutan"], answer:0},
+  {q:"14. Sikkim’s move to become an organic state primarily focused on banning which input?", options:["Irrigation","Chemical fertilizers and pesticides","Tractors","Greenhouses"], answer:1},
+  {q:"15. Which national park in Sikkim is known for high biodiversity including rare species like red pandas?", options:["Khangchendzonga National Park","Valley of Flowers","Manas National Park","Sundarbans"], answer:0},
+  {q:"16. What is the name of Sikkim’s prominent mountain conservation area that includes Kangchenjunga?", options:["Khangchendzonga Biosphere Reserve","Himalayan Conservation Zone","Sikkim Protected Area","Eastern Himalaya Reserve"], answer:0},
+  {q:"17. Which popular viewpoint near Gangtok gives panoramic sunrise views of the Himalayas?", options:["Tashi Viewpoint","Nathula Pass","Sevoke Viewpoint","Zuluk"], answer:0},
+  {q:"18. Which pass connects Sikkim with Tibet historically and is also used as a border trade route (seasonal)?", options:["Jelep La / Nathu La region","Rohtang Pass","Khardung La","Nathu La/Jelep La area"], answer:3},
+  {q:"19. Which flower genus is Sikkim particularly famous for—there are orchid centres near Gangtok?", options:["Rhododendron and Orchids","Lily","Tulip","Sunflower"], answer:0},
+  {q:"20. Which district in Sikkim includes high-altitude villages like Lachen and Lachung?", options:["North Sikkim","East Sikkim","West Sikkim","South Sikkim"], answer:0},
+
+  {q:"21. Which major development in Sikkim improved direct air connectivity to the state in recent years?", options:["Opening of Pakyong Airport","Opening of Bagdogra Terminal","New sea port","New rail link"], answer:0},
+  {q:"22. Sikkim borders which country to the east?", options:["Bangladesh","Bhutan","Nepal","Myanmar"], answer:1},
+  {q:"23. The Teesta River is an important river for Sikkim. Which state does it flow into after leaving Sikkim?", options:["West Bengal","Assam","Bihar","Odisha"], answer:0},
+  {q:"24. Which famous festival of Sikkim involves vibrant masked dances and is a Buddhist festival?", options:["Losar/Tshechu/Gyalyum Chenmo type (masked dances)", "Diwali","Holi","Pongal"], answer:0},
+  {q:"25. Sikkim lies in which major mountain range?", options:["Aravalli Range","Himalayas","Vindhyas","Western Ghats"], answer:1},
+  {q:"26. Which is an important economic activity in rural Sikkim aside from tourism?", options:["Shipbuilding","Horticulture and terrace farming","Large-scale mining","Desert agriculture"], answer:1},
+  {q:"27. Which administrative change happened in Sikkim in 1975?", options:["It became an independent country","It became part of India as a State","It joined Bhutan","It became a Union Territory"], answer:1},
+  {q:"28. Which nearby West Bengal town is the typical railhead and road gateway for travelers to Sikkim?", options:["Siliguri / New Jalpaiguri region","Darjeeling","Kurseong","Alipurduar"], answer:0},
+  {q:"29. Which kind of tourism does Sikkim actively promote given its environmental policies?", options:["Mass beach tourism","Eco-tourism and responsible mountain tourism","Industrial tourism","Desert tourism"], answer:1},
+  {q:"30. Which Himalayan festival and tradition are preserved in Sikkim and attract cultural tourists?", options:["Losar and Chaam (mask dances)","Ganesh Chaturthi","Onam","Baisakhi"], answer:0},
+
+  {q:"31. Name the traditional garment widely worn by Sikkim’s ethnic communities (Bhutia and Lepcha).", options:["Sari","Bakhu/Gho","Dhoti","Lungi"], answer:1},
+  {q:"32. What is the main reason Sikkim is considered a model for green development in India?", options:["Large urbanization","Organic agriculture, biodiversity focus, and conservation policies","Heavy industry","Dense mining activities"], answer:1},
+  {q:"33. Which is a primary conservation concern in Sikkim associated with climate change?", options:["Sea level rise","Glacial retreat and changes in water availability","Desertification","Tsunamis"], answer:1},
+  {q:"34. Which is the state bird of Sikkim?", options:["Blood Pheasant","Indian Peafowl","Sarus Crane","House Sparrow"], answer:0},
+  {q:"35. Which important economic corridor/link helps Sikkim reach markets via West Bengal?", options:["Siliguri Corridor (Chicken's Neck)","Golden Quadrilateral","North-South Corridor","East-West Corridor"], answer:0},
+  {q:"36. Name a famous palace historic site in Sikkim used by former Chogyals.", options:["Tashi Namgye Palace / Rumtek vicinity (e.g., Tsuklakhang Palace/Rabdentse)","Red Fort","Golconda Fort","Amer Fort"], answer:0},
+  {q:"37. Which is a common language widely spoken in Sikkim (used in administration & daily life)?", options:["Nepali","Kannada","Tamil","Marathi"], answer:0},
+  {q:"38. Which Sikkim location is well-known for hot springs often visited by locals and tourists?", options:["Ravangla/Singithang","Yangtey","Tsomgo (Changu) area has hot springs at some places","Reshi Hot Springs (near Pelling area)"], answer:3},
+  {q:"39. Which Sikkim district headquarters is Namchi the capital of?", options:["South Sikkim","East Sikkim","North Sikkim","West Sikkim"], answer:0},
+  {q:"40. Sikkim has made headlines for conservation of which endangered mammal often associated with Himalayan forests?", options:["Tiger","Red Panda","Lion","African Elephant"], answer:1},
+
+  {q:"41. Which sector provides significant employment and income for many households in Sikkim?", options:["Horticulture, cardamom and vegetable farming","Large-scale software industry","Automobile assembly","Shipbuilding"], answer:0},
+  {q:"42. Which local Sikkim place is famous for orchids and has an orchid sanctuary near Gangtok?", options:["Namchi Orchid Centre / Flower exhibition centre","Tsomgo Lake Orchid Park","Pakyong Orchid Island","Mangan Orchid House"], answer:0},
+  {q:"43. Which pass on the Sikkim–China border was reopened for limited trade after improvements (recent decades)?", options:["Nathu La","Rohtang","Zoji La","Khardung La"], answer:0},
+  {q:"44. Which feature is a major attraction of North Sikkim (Lachen & Lachung area)?", options:["High-altitude lakes, glaciers and alpine landscapes","Beaches","Desert dunes","Backwaters"], answer:0},
+  {q:"45. Which mountain-climbing or trekking region is closely associated with Sikkim’s identity?", options:["Kangchenjunga massif trekking region","Mount Abu","Kedarnath","Annapurna Circuit"], answer:0},
+  {q:"46. Which state-run initiative helps connect remote Sikkim villages with telemedicine and mobile health efforts (general kind of initiative)?", options:["Telemedicine/mobile health camps","Maritime rescue","Space launches","Oil exploration"], answer:0},
+  {q:"47. Name one traditional festival in Sikkim associated with the Lepcha community.", options:["Losar","Saga Dawa","Kheyang (Lepcha rites) / Tendong Lho Rum Faat","Onam"], answer:2},
+  {q:"48. Which town is often used as a staging point for trips to Tsomgo (Changu) Lake and Nathu La?", options:["Gangtok","Mangan","Namchi","Gyalshing"], answer:0},
+  {q:"49. Which cash crop gave Sikkim farmers substantial income historically before full organic transition?", options:["Cardamom","Cotton","Sugarcane","Rice only"], answer:0},
+  {q:"50. Which protected area in Sikkim is recognized as a UNESCO biosphere reserve?", options:["Khangchendzonga National Park/Biosphere Reserve","Corbett","Sundarbans","Manas"], answer:0},
+
+  {q:"51. Which town in Sikkim is known for its butterfly and peaceful environment and is promoted for eco-tourism?", options:["Pelling","Kolkata","Chennai","Vishakhapatnam"], answer:0},
+  {q:"52. Sikkim’s terrain mainly consists of which of the following?", options:["Plains and deserts","Mountainous terrain with steep valleys","Coastal plains","Large plateaus"], answer:1},
+  {q:"53. Which neighboring Indian state provides the major logistic and rail connectivity support to Sikkim?", options:["West Bengal","Bihar","Odisha","Punjab"], answer:0},
+  {q:"54. Which national program does Sikkim use to promote rural development and livelihoods (type of scheme)?", options:["Horticulture & rural livelihood programs/NRLM-type support","Urban renewal only","Space program","Maritime safety"], answer:0},
+  {q:"55. Which town hosts the state administrative offices and secretariat in Sikkim?", options:["Gangtok","Namchi","Mangan","Gyalshing"], answer:0},
+  {q:"56. Sikkimese art and cultural performances often include dances with what distinctive feature?", options:["Masked dances with colorful costumes","Only instrumental music","Puppetry only","Mime only"], answer:0},
+  {q:"57. Which flora zone is abundant in Sikkim and notable for alpine flowers like rhododendrons?", options:["Alpine and temperate forests","Mangrove forests","Tropical evergreen lowlands","Savannah"], answer:0},
+  {q:"58. Which is the longest river in Sikkim state area (major river within/affecting state)?", options:["Teesta","Ganges","Brahmaputra","Yamuna"], answer:0},
+  {q:"59. Which major hydropower potential resource makes Sikkim important for renewable energy projects?", options:["Mountain rivers (Teesta & tributaries)","Offshore wind","Solar deserts","Geothermal vents"], answer:0},
+  {q:"60. Which is an environmental-tourism initiative Sikkim promotes to protect fragile mountain ecosystems?", options:["Regulated trekking & eco-lodges","Develop large theme parks","Urban skyscrapers","Large-scale shopping malls"], answer:0},
+
+  {q:"61. Which NGO or community approach is commonly used in Sikkim to support organic certification of farmers (type of method)?", options:["Farmer cooperatives and cluster-level organic certification","Large chemical company contracts only","Large scale factory farming","Import of vegetables"], answer:0},
+  {q:"62. Which ethnic group is indigenous to parts of Sikkim and has important traditional rights (community)?", options:["Lepcha","Marathi","Punjabi","Gujarati"], answer:0},
+  {q:"63. Which historical ruling family ruled Sikkim until mid-20th century?", options:["The Chogyal dynasty","The Mughals","The British Raj as rulers","The Marathas"], answer:0},
+  {q:"64. Which town is a major base for exploring West Sikkim attractions (e.g., Pemayangtse)?", options:["Pelling","Gangtok","Namchi","Mangan"], answer:0},
+  {q:"65. Which wildcat species is found in Sikkim’s higher forests and is a conservation focus?", options:["Snow Leopard (higher zones) / Clouded Leopard / Red Panda habitat (mammals)", "Lion","Cheetah","Tiger only in plains"], answer:0},
+  {q:"66. Which Sikkim hill station or viewpoint is famous for panoramic views of Kanchenjunga?", options:["Tashi Viewpoint / Hanuman Tok region","Kasauli","Mussoorie","Ooty"], answer:0},
+  {q:"67. Which market in Gangtok is famous for local handicrafts and souvenirs for visitors?", options:["MG Marg (Gangtok)","Dilli Haat","Crawford Market","Borough Market"], answer:0},
+  {q:"68. Sikkim’s tourism policy often emphasizes which of the following approaches?", options:["Low-impact, high-value tourism","High-volume mass tourism with unlimited construction","Industrial tourism","Ocean cruises"], answer:0},
+  {q:"69. Which day is celebrated as Sikkim State Day (month/year you can mention as statehood day)?", options:["May 16 (Sikkim State Day is in May; 1975 statehood)","January 26","August 15","October 2"], answer:0},
+  {q:"70. Which mountain pass is a strategic link and is visited by tourists for its historical significance?", options:["Nathu La (connects to China/Tibet)","Rohtang","Khardung La","Zoji La"], answer:0},
+
+  {q:"71. Which Sikkim region is known for producing large quantities of cardamom?", options:["South and East Sikkim valleys","North Sikkim high plateaus","Western deserts","Central plains"], answer:0},
+  {q:"72. Which island-type habitat is nearly absent in Sikkim due to its geography?", options:["Mangrove swamps","Alpine meadows","Temperate forests","Riverine habitats"], answer:0},
+  {q:"73. Which specialized tourism activity has grown in Sikkim: birdwatching, trekking, or beach parties?", options:["Birdwatching & trekking (mountain eco-tourism)","Beach parties","Desert safaris","Deep-sea diving"], answer:0},
+  {q:"74. Which popular Sikkim tourist lake is close to Gangtok and often visited on day trips?", options:["Tsomgo (Changu) Lake","Dal Lake (Srinagar)","Vembanad Lake","Ooty Lake"], answer:0},
+  {q:"75. Which industry is deliberately restricted to protect Sikkim’s ecology?", options:["Large scale mining & heavy polluting industry","Horticulture","Cottage crafts","Eco-lodges"], answer:0},
+  {q:"76. Which is a major challenge for road connectivity in Sikkim?", options:["Frequent landslides and slope instability","Excessive flat plains","Desert sandstorms","Permafrost melting"], answer:0},
+  {q:"77. The term 'Chogyal' in Sikkim refers to what?", options:["Traditional monarch or king of Sikkim","A mountain pass","A festival","A currency"], answer:0},
+  {q:"78. Which Sikkim town is the headquarters of North Sikkim district?", options:["Mangan","Gangtok","Namchi","Pelling"], answer:0},
+  {q:"79. Which initiative helps Sikkim market its organic produce outside the state (type)?", options:["Branding and export promotion of organic cardamom & vegetables","Building airports only","Opening big shopping malls","Large mining exports"], answer:0},
+  {q:"80. Which river valley in Sikkim is particularly important for agriculture and settlements?", options:["Teesta Valley","Ganges Delta","Indus Plain","Narmada Basin"], answer:0},
+
+  {q:"81. Which is a popular trekking base in East/West Sikkim for local treks?", options:["Yuksom / Pelling / Dzongri routes (examples)","Bengaluru","Chennai","Mumbai"], answer:0},
+  {q:"82. Which Sikkim development is often highlighted as improving emergency medical response (recent improvements)?", options:["Telemedicine, upgraded district hospitals and referral systems","Sea rescue teams","Oil rigs","Desert ambulances"], answer:0},
+  {q:"83. Which species of plant/tree is important in Sikkim’s temperate forests (example)?", options:["Rhododendron","Baobab","Cactus","Mangrove"], answer:0},
+  {q:"84. Which kind of cultural cuisine is a specialty in Sikkim (typical local dish)?", options:["Momos and Thukpa (Tibetan-influenced)","Dosa only","Biryani only","Fish curry only"], answer:0},
+  {q:"85. Which district of Sikkim has significant alpine plateau areas and is sparsely populated?", options:["North Sikkim","South Sikkim","East Sikkim","West Sikkim"], answer:0},
+  {q:"86. Which tourist activity is limited or regulated to protect alpine zones in Sikkim?", options:["Mountaineering & trekking permits / restricted areas","Urban shopping","Highway racing","Beach volleyball"], answer:0},
+  {q:"87. Which heritage palace in Sikkim is associated with the royal Chogyals and historical governance?", options:["Rabdentse (historic capital) and Rumtek area palaces","Amber Palace","Red Fort","Qutub Minar"], answer:0},
+  {q:"88. Name one important government priority for Sikkim’s future economy?", options:["Sustainable tourism, organic agriculture & improved connectivity","Large-scale industrialization","Whale hunting","Coal mining"], answer:0},
+  {q:"89. Which is a commonly visited viewpoint near Pelling famous for views of Kanchenjunga?", options:["Pemayangtse/ Kanchenjunga view points","Gateway of India","Marine Drive","Café Coffee Day"], answer:0},
+  {q:"90. Which festival is linked to harvest and community celebrations in Sikkim?", options:["Lhosar / Pang Lhabsol / harvest festivals","Eid only","Christmas only","Halloween only"], answer:0},
+
+  {q:"91. Which hill town in Sikkim is well-known for monasteries including Pemayangtse?", options:["Pelling","Gangtok","Mangan","Namchi"], answer:0},
+  {q:"92. Which conservation animal is iconic to Sikkim’s wildlife and often used as ambassador for conservation programs?", options:["Red panda","Camel","Polar bear","Kangaroo"], answer:0},
+  {q:"93. Which policy area is crucial for Sikkim due to mountainous terrain and climate change risks?", options:["Disaster management & slope stabilization","Deep sea port expansion","Large-scale irrigation canals across plains","Desertification countermeasures"], answer:0},
+  {q:"94. Which tourism circuit links religious, cultural and natural attractions in Sikkim for visitors?", options:["Gangtok–Pelling–Yuksom–North Sikkim circuit","Mumbai–Pune–Goa circuit","Chennai–Bengaluru circuit","Kolkata–Digha circuit"], answer:0},
+  {q:"95. Sikkim’s environment is notable for which plants that bloom in spring and draw visitors?", options:["Rhododendrons and alpine blooms","Coconut palms","Mangroves","Saguaro cacti"], answer:0},
+  {q:"96. Which body of water is near the capital and invites visitors for scenic views (day trip)?", options:["Tsomgo (Changu) Lake","Dal Lake (Srinagar)","Vembanad","Pichola"], answer:0},
+  {q:"97. Which area is promoted as a center for floriculture and orchids in Sikkim?", options:["Near Gangtok / Papenpetal orchid centers","Rann of Kutch","Thar Desert","Sundarbans"], answer:0},
+  {q:"98. Which local craft from Sikkim is commonly sold to tourists?", options:["Handwoven textiles and traditional handicrafts","Mass-produced electronics","Automobile parts","Oil paintings only"], answer:0},
+  {q:"99. Which educational institution in Sikkim focuses on higher education and has gained prominence?", options:["Sikkim University and specialized colleges","University of Mumbai only","IIT Bombay only","IIM Ahmedabad only"], answer:0},
+  {q:"100. Which is a major environmental concern resulting from unplanned tourism in fragile mountain regions like Sikkim?", options:["Waste and pressure on water/slope stability","Ocean acidification","Desertification of beaches","Loss of coral reefs"], answer:0},
+
+  {q:"101. Which high-altitude lake in North Sikkim is sacred and draws pilgrims and visitors?", options:["Gurudongmar Lake","Pangong Lake","Dal Lake","Wular Lake"], answer:0},
+  {q:"102. Which is an action state and central governments often collaborate on for Sikkim’s development?", options:["Road and rail surveys for better connectivity","Marine conservation","Deep-sea mining","Large-scale desert irrigation"], answer:0},
+  {q:"103. Which small community festival features mask dances that are visually striking for tourists?", options:["Chaam / masked dances","Diwali only","Christmas only","Easter only"], answer:0},
+  {q:"104. Which area in Sikkim has been involved in pilot projects for organic certification and farmer clusters?", options:["South & East Sikkim farming clusters","Urban high-tech parks","Coastal aquaculture","Arid agriculture zones"], answer:0},
+  {q:"105. Which district in Sikkim is Gyalshing associated with (headquarters of West Sikkim)?", options:["West Sikkim","East Sikkim","North Sikkim","South Sikkim"], answer:0},
+  {q:"106. Which eco-friendly livelihood is widely encouraged among Sikkim communities (tourism-adjacent)?", options:["Home stays & community-based eco-lodges","Large-scale petrochemical plants","Coal mining","Deep sea fishing"], answer:0},
+  {q:"107. Which mountain is traditionally considered sacred and protected by local custom around Sikkim?", options:["Kangchenjunga","Mount Fuji","Mount Kilimanjaro","Mount Vesuvius"], answer:0},
+  {q:"108. Which national-level recognition did Sikkim achieve when it promoted organic farming widely?", options:["Declared India’s first fully organic state in large measure","Seat on UN Security Council","Olympic Games host","Nobel Prize"], answer:0},
+  {q:"109. Which kind of natural disaster is a recurring concern in Sikkim's hilly regions?", options:["Landslides and flash floods","Tornadoes","Hurricanes","Volcanic eruptions"], answer:0},
+  {q:"110. Which prominent trekking route near Yuksom and Dzongri provides iconic Himalayan views?", options:["Goecha La / Dzongri treks","Kedarnath trek only","Manali-Leh trek only","Annapurna Base Camp only"], answer:0},
+
+  {q:"111. Which program helps Sikkim’s mountain farmers get higher value for organic produce (type)?", options:["Value chain & branding support","Deep sea export only","Large-scale industrial processing","Desert irrigation"], answer:0},
+  {q:"112. What is one reason Sikkim is geopolitically important for India?", options:["Proximity to China/Tibet border and strategic mountain passes","Coastline and ports","Large oil reserves","Large deserts"], answer:0},
+  {q:"113. Which facility opened in Pakyong improved what for the state?", options:["Air connectivity (Pakyong Airport)","Deep sea port","New railhead in the town center","Rocket launch site"], answer:0},
+  {q:"114. Which town is often used as a stop for travelers going toward North Sikkim high-altitude areas?", options:["Mangan","Kolkata","Chennai","Pune"], answer:0},
+  {q:"115. Which national highway link is the main road approach connecting Sikkim to the plains?", options:["NH10 (connects Siliguri-Gangtok route)","NH44","NH16","NH48"], answer:0},
+  {q:"116. Which practice in Sikkim has reduced chemical runoff and improved biodiversity on farms?", options:["Organic cultivation and integrated pest management","Mass pesticide spray campaigns","Open dumping of plastics","Heavy mining"], answer:0},
+  {q:"117. Which kind of tourism does Sikkim encourage to ensure local benefits remain with communities?", options:["Community-based and homestay tourism","Large foreign-owned resorts only","Theme-park-based tourism","Casino tourism"], answer:0},
+  {q:"118. Which is a notable historical capital site of Sikkim that now is an archaeological attraction?", options:["Rabdentse (historic capital)","Old Delhi","Agra Fort","Red Fort area"], answer:0},
+  {q:"119. Which type of forests in Sikkim host rhododendrons and diverse birds?", options:["Temperate and alpine forests","Tropical mangrove forests","Desert scrub","Tropical dry deciduous only"], answer:0},
+  {q:"120. Which district lies to the west of Gangtok and has important tourist spots?", options:["West Sikkim (Gyalshing / Pelling areas)","South Sikkim only","East Sikkim only","North Sikkim only"], answer:0},
+
+  {q:"121. Which educational focus has been emphasized to keep mountain communities resilient (type)?", options:["Skill training for hospitality, organic agriculture and eco-enterprises","Large-scale automobile manufacturing","Only IT hubs","Only export processing zones"], answer:0},
+  {q:"122. Which animal is featured on many conservation education programs in Sikkim’s forests?", options:["Red Panda","Camel","Kangaroo","Polar Bear"], answer:0},
+  {q:"123. Which Sikkim region is recognized for yak grazing and alpine meadows (higher altitudes)?", options:["North Sikkim high pastures","South Sikkim lowlands","East Sikkim plains","West Sikkim coasts"], answer:0},
+  {q:"124. Which is a commonly given tourist safety advice for visiting high-altitude Sikkim areas?", options:["Acclimatize gradually & carry necessary permits","Swim every day","Avoid sunscreen","Bring heavy beachwear"], answer:0},
+  {q:"125. Name a notable economic export from Sikkim aside from cardamom?", options:["Ornamental plants and floriculture produce","Coal","Crude oil","Ship components"], answer:0},
+  {q:"126. Which traditional Sikkimese instrument or art is showcased in cultural festivals?", options:["Mask dance music and indigenous instruments","Bagpipes only","Saxophone only","DJ sets only"], answer:0},
+  {q:"127. Which is a key priority when planning new infrastructure in Sikkim (environment-wise)?", options:["Minimize slope cutting and reduce ecological impact","Maximize deforestation","Increase mining only","Fill wetlands for construction"], answer:0},
+  {q:"128. Which local cuisine item would you find commonly in Sikkimese households and restaurants?", options:["Momos and Thukpa (Tibetan origin dishes)","Sushi only","Tacos only","Jollof rice only"], answer:0},
+  {q:"129. Which is a major challenge for healthcare delivery in remote Sikkim mountain villages?", options:["Access due to terrain and weather","Too many beaches","Desert heat","Large metropolitan congestion"], answer:0},
+  {q:"130. Name one central/state collaboration piece often discussed for Sikkim that improves connectivity.", options:["Railway surveys and road tunnels proposals","Deep sea pipelines","Subsea cables only","Desert canals"], answer:0},
+
+  {q:"131. Which educational awareness campaign is important for sustainable mountain tourism in Sikkim?", options:["Visitor awareness on waste management and permitted areas","Deep sea awareness","Desert survival training","Urban traffic training"], answer:0},
+  {q:"132. Which language is taught and used in many schools in Sikkim along with Nepali?", options:["English (medium & second-language)","Portuguese","Spanish","Arabic"], answer:0},
+  {q:"133. Which is a natural attraction frequently promoted by Sikkim tourism boards (lake/valley)?", options:["Tsomgo (Changu) Lake & Yumthang/Valley of Flowers","Sundarbans","Rann of Kutch","Kerala backwaters"], answer:0},
+  {q:"134. Which is a commonly used strategy to reduce disaster risk on steep slopes in Sikkim?", options:["Slope stabilization, retaining walls and bioengineering","Planting palm trees","Large coastal seawalls","Damming deserts"], answer:0},
+  {q:"135. Which Sikkim town is famous for the giant statue and monasteries near Namchi (e.g., Samdruptse)?", options:["Namchi (Samdruptse statue region)","Pelling only","Mangan only","Gyalshing only"], answer:0},
+  {q:"136. Which traditional tribe uses unique dress and cultural dances in Sikkim festivals?", options:["Lepcha and Bhutia communities","Punjabi only","Tamil only","Oriya only"], answer:0},
+  {q:"137. Which is an important way local communities in Sikkim earn additional income aside from farming?", options:["Homestays, guiding and small handicraft sales","Large-scale manufacturing","Oil extraction","Large-scale logging"], answer:0},
+  {q:"138. Which type of protected area is present around Kangchenjunga for conservation?", options:["Biosphere reserve & national park (Khangchendzonga)","Marine sanctuary","Desert reserve","Urban park"], answer:0},
+  {q:"139. Which Sikkim region experienced infrastructure improvements like new district hospitals and roads in recent development plans (general)?", options:["Multiple districts with targeted projects (statewide focus)","Only the capital","Only neighboring states","Only the coastlines"], answer:0},
+  {q:"140. Which traditional celebration often involves community feasts and offerings to mountain deities in Sikkim?", options:["Pang Lhabsol and other local festivals","Only Diwali","Only New Year parties","Only Halloween"], answer:0},
+
+  {q:"141. Which activity is often regulated with permits in Sikkim to protect sensitive areas?", options:["High-altitude trekking & certain lakes/valleys","Visiting shopping malls","Driving on plains","Swimming in the sea"], answer:0},
+  {q:"142. Which town is often used as the gateway to explore West Sikkim cultural attractions?", options:["Gyalshing/Pelling region","Mumbai","Chennai","Hyderabad"], answer:0},
+  {q:"143. Which fish or aquatic life is commonly absent in Sikkim due to altitude and cold waters?","options":["Tropical reef fish","Cold-water trout species","Local river minnows","Freshwater invertebrates"], answer:0},
+  {q:"144. Which mountain pass on the Sikkim–Tibet border is strategically significant and has seen phased reopenings for trade?", options:["Nathu La","Rohtang","Zoji La","Torlai"], answer:0},
+  {q:"145. Which major conservation message is emphasized in Sikkim’s tourism materials?", options:["Leave no trace and respect local customs","Only party tourism","Mass deforestation for hotels","Industrial fishing"], answer:0},
+  {q:"146. Which sustainable product branding is Sikkim known for internationally?", options:["Organic cardamom and organic vegetables","Coal exports","Crude oil exports","Steel production"], answer:0},
+  {q:"147. Which mountain ecosystem supports Sikkim’s rhododendron diversity (broad classification)?", options:["Temperate and subalpine forests","Mangrove swamps","Tropical lowland evergreen","Desert scrub"], answer:0},
+  {q:"148. Which historic event led to Sikkim’s political reorganization into the Indian Union in 1975?", options:["Popular movement & referendum leading to merger with India","Voluntary unification with Nepal","Separation as independent nation","Annexation by Bhutan"], answer:0},
+  {q:"149. Which is an environmental regulation tourists must often follow in protected zones of Sikkim?", options:["Carry permits, avoid littering & follow designated trails","Fish without license","Cut trees freely","Drive off-road everywhere"], answer:0},
+  {q:"150. Which is a key cultural attraction used to promote Sikkim to visitors from other Indian states?", options:["Monasteries, festivals, mountain scenery and homestays","Large casinos","Huge theme parks","Desert rallies"], answer:0},
+
+  {q:"151. Which district in Sikkim has many cardamom farms and tea-vegetable mixed cropping?", options:["South & East districts (general)","Only North Sikkim","Only West Bengal","Only Assam"], answer:0},
+  {q:"152. Which activity is restricted at high altitudes to reduce environmental impact in Sikkim?", options:["Large uncontrolled campfires and unregulated camping","Visiting local markets","Buying local crafts","Using public transport"], answer:0},
+  {q:"153. Which educational upliftment initiative is important for youth in remote Sikkim areas (type)?", options:["Skill training for tourism/horticulture & scholarships","Deep sea diving training","Large-scale factory apprenticeships","Oil rig training"], answer:0},
+  {q:"154. Which is a prominent historical ruin or site that marks Sikkim’s pre-modern political centers?", options:["Rabdentse ruins (near Pelling)","Qutub Minar","Agra Fort","Hampi ruins"], answer:0},
+  {q:"155. Which economic measure benefits small farmers in Sikkim producing organic crops (type)?", options:["Aggregation, processing & direct market linkages","Only import subsidies","Only large-scale factory contracts","Only coal mining incentives"], answer:0},
+  {q:"156. Which community practice helps reduce landslide risks when constructing roads in Sikkim (type)?", options:["Bioengineering & terracing","Urban concrete filling only","Building on floodplains","Clearing all vegetation"], answer:0},
+  {q:"157. Which climate zone would a traveler pass through going from South to North Sikkim?", options:["Subtropical to temperate to alpine","Tropical to desert","Polar to desert","Savanna to mangrove"], answer:0},
+  {q:"158. Which is a famous high-altitude village serving trekkers and pilgrims in North Sikkim?", options:["Lachen or Lachung (examples)","Darjeeling only","Kolkata only","Siliguri only"], answer:0},
+  {q:"159. Which is a popular craft product sold in Sikkim markets to tourists?", options:["Handwoven woolens and traditional textiles","Plastic imports only","Mass-produced electronics","Imported perfumes"], answer:0},
+  {q:"160. Which conservation approach is used in protecting fragile alpine wetlands in Sikkim?", options:["Community-based protection and regulated access","Large-scale drainage","Industrial landfilling","Urban expansion"], answer:0},
+
+  {q:"161. Which of the following is a major challenge for sustaining mountain agriculture in Sikkim?", options:["Soil erosion and slope stability","Excess of flat arable land","Hurricanes and cyclones only","Large tidal waves"], answer:0},
+  {q:"162. Which is a strategy used by Sikkim to add value to horticulture produce?", options:["Cold-chain, grading, branding and organic certification","Only raw export without value addition","Only sale to local markets","Only burning the crop"], answer:0},
+  {q:"163. Which is an important cultural museum or place preserving Sikkim history for visitors?", options:["State museums and cultural centers in Gangtok/Pelling","Large film studios only","Space museums only","Marine museums only"], answer:0},
+  {q:"164. Which transport link is repeatedly discussed to ease movement from plains to Sikkim?", options:["Railway surveys and proposed link alignments","Sea route from Chennai","Cross-country highway through deserts","Trans-Saharan road"], answer:0},
+  {q:"165. Which famous statue/monument is located near Namchi (Samdruptse)?", options:["Huge statue of Guru Padmasambhava (Samdruptse)","Statue of Liberty","Christ the Redeemer","Easter Island heads"], answer:0},
+  {q:"166. Which local product is part of Sikkim’s tourism promotion (floriculture)?", options:["Orchids and floriculture exhibitions","Coal exhibitions","Metal work only","Petroleum products"], answer:0},
+  {q:"167. Which program type supports local cottage industries and craftspeople in Sikkim?", options:["Skill & micro-enterprise support and craft clusters","Large multinational takeover","Only imports","Only heavy industrial schemes"], answer:0},
+  {q:"168. Which heritage trail or route draws visitors to study Sikkim’s royal past?", options:["Rabdentse heritage and palace trails","Only modern malls","Modern skyscraper trails","Oil refinery tours"], answer:0},
+  {q:"169. Which area is important for alpaca/horse/yak grazing and pastoral activities in higher Sikkim altitudes?", options:["High-altitude pastures in North Sikkim","Coastal plains","Desert steppes","Lowland paddy fields"], answer:0},
+  {q:"170. Which of these is a key natural resource base for small hydropower in Sikkim?", options:["Mountain rivers & fast-flowing streams","Tidal waves","Large reservoirs in plains","Desert wadis"], answer:0},
+
+  {q:"171. Which policy priority helps Sikkim maintain cultural heritage while developing tourism (approach)?", options:["Community involvement and cultural preservation","Only monetizing heritage without local input","Large-scale demolitions","Replacing villages with resorts"], answer:0},
+  {q:"172. Which is the primary challenge for waste management in mountainous tourist spots of Sikkim?", options:["Collecting and disposing of non-biodegradable waste in fragile terrain","Too many motorways","Too many ports","Excessive desert waste"], answer:0},
+  {q:"173. Which inter-state connection is crucial for Sikkim’s supplies and mobility (state)?", options:["West Bengal (Siliguri corridor and road links)","Tamil Nadu","Rajasthan","Karnataka"], answer:0},
+  {q:"174. Which kind of birds attract birdwatchers to Sikkim (example)?", options:["Himalayan pheasants, eagles and diverse passerines","Penguins only","Ostriches only","Emus only"], answer:0},
+  {q:"175. Which is an important seasonal event that brings visitors to North Sikkim for flower displays?", options:["Yumthang Valley (Valley of Flowers) blooms","Monsoon only","Winter carnivals only","Summer beaches only"], answer:0},
+  {q:"176. Which mountain region near Sikkim is part of a larger transboundary conservation landscape?", options:["Eastern Himalaya including Khangchendzonga","Sundarbans only","Thar desert only","Western Ghats only"], answer:0},
+  {q:"177. Which festival honors the guardian deity of Sikkim and features community processions (short)?", options:["Pang Lhabsol (honoring Mount Kanchenjunga deity)","Halloween only","Thanksgiving only","Carnival only"], answer:0},
+  {q:"178. Which is a key element of Sikkim’s brand when attracting overseas tourists?", options:["Pristine mountain scenery, culture and organic produce","Large beaches and coral reefs","Massive amusement parks","Desert festivals"], answer:0},
+  {q:"179. Which river management challenge affects farmers in Sikkim and downstream users?", options:["Seasonal variability and sediment loads in mountain rivers","Permanent calm lakes only","No water issues","Only groundwater flooding"], answer:0},
+  {q:"180. Which approach is used to reduce human-wildlife conflict in Sikkim areas near protected forests?", options:["Community awareness, compensation schemes and fencing in hotspots","Open hunting","No action","Mass relocation of wildlife to cities"], answer:0},
+
+  {q:"181. Which is a popular travel season in Sikkim for clear mountain views and festivals?", options:["Spring and autumn (March-May and Sep-Nov)","Monsoon only","Winter only","December only"], answer:0},
+  {q:"182. Which development helps local entrepreneurs sell local produce directly to consumers (type)?", options:["Local markets, co-operatives and e-marketing support","Large oil export deals only","Only imports subsidies","Only heavy industrial procurement"], answer:0},
+  {q:"183. Which natural phenomenon in Himalaya is closely monitored for Sikkim’s water security?", options:["Glacial melt and retreat","Tidal waves","Desertification","Volcano eruptions"], answer:0},
+  {q:"184. Which community-level tourism initiative helps distribute tourist income widely in villages?", options:["Homestays and community-guided treks","Only large hotels","Only cruise ships","Only amusement parks"], answer:0},
+  {q:"185. Which is an iconic Sikkimese snack or street food you will find on MG Marg?", options:["Momos and local snacks","Samosa only","Dosa only","Tacos only"], answer:0},
+  {q:"186. Which approach is used to ensure new roads are safer in Sikkim’s hilly terrain?", options:["Retaining walls, better drainage and slope stabilization works","No engineering works","Only concrete paving on every slope","Large open cuts without protection"], answer:0},
+  {q:"187. Which flower festival or event often draws horticulture interest to Sikkim?", options:["Orchid & floriculture shows near Gangtok / regional flower fests","Desert flower shows","Beach flower exhibits","Coral gardening events"], answer:0},
+  {q:"188. Which is a popular viewpoint near Pelling visited for sunrise views of Kanchenjunga?", options:["Khecheopalri / Pemayangtse viewpoints (examples)","Marine drive only","Clifton only","Bondi only"], answer:0},
+  {q:"189. Which is an example of a community-based conservation measure in Sikkim?", options:["Local patrols, eco-development committees and regulated grazing","Unregulated logging","Large-scale urbanization","Only private resorts"], answer:0},
+  {q:"190. Which Sikkim town has been highlighted for infrastructure upgrades in recent development plans (general)?", options:["Pakyong / Namchi / district centers (examples)","Mumbai only","Bengaluru only","Hyderabad only"], answer:0},
+
+  {q:"191. Which small-scale renewable energy option is appropriate to expand in Sikkim's villages?", options:["Micro-hydro and solar hybrid systems","Large offshore wind only","Only coal-fired power","Large oil refineries"], answer:0},
+  {q:"192. Which local festival showcases traditional mask dances and is important culturally?", options:["Chaam/Masked dances at monasteries","Carnival only","Oktoberfest only","Hanami only"], answer:0},
+  {q:"193. Which is a common conservation challenge across Himalayan protected areas including Sikkim?", options:["Poaching, habitat fragmentation and climate impacts","Overfishing in the ocean only","Hurricane damage only","Sandstorm damage only"], answer:0},
+  {q:"194. Which Sikkim destination is valued for birdwatchers looking for Himalayan species?", options:["Singalila Ridge and lower Himalayan zones around Sikkim (birdwatching circuits)","Sahara Desert only","Amazon only","Great Barrier Reef only"], answer:0},
+  {q:"195. Which is a local governance priority for service delivery in remote Sikkim panchayats?", options:["Improved access to health, education and electricity","Only building skyscrapers","Only building theme parks","Only ports"], answer:0},
+  {q:"196. Which measure helps reduce pollution impacts from tourism in Sikkim towns?", options:["Solid waste segregation, bans on single-use plastics, and visitor caps","Only allow more cars","Open dumping of waste","Only increase industry"], answer:0},
+  {q:"197. Which long-term natural resource is critical for Sikkim’s hydropower and irrigation planning?", options:["Glacial-fed river flows and seasonal water availability","Oil reserves","Large coal seams","Large sand dunes"], answer:0},
+  {q:"198. Which Sikkim route is a favored approach to high-altitude trekking for spectacular views?", options:["Goecha La / Kanchenjunga base circuit","Kanyakumari route","Konkan coast route","Congo basin route"], answer:0},
+  {q:"199. Which common educational push helps youth find non-farm employment in Sikkim?", options:["Training in hospitality, eco-guiding and agribusiness value chains","Only fisher training","Large-scale auto jobs only","Only port jobs"], answer:0},
+  {q:"200. Which kind of question would you add to improve future Sikkim quizzes (meta-question)?", options:["Local policy, geography, culture or recent developments — you decide (open-ended)","Only global politics","Only sports from other countries","Only space exploration"], answer:0}
+];
+
+/* ====== STATE ====== */
+let current = 0;
+let userAnswers = new Array(questions.length).fill(null);
+let flagged = new Array(questions.length).fill(false);
+let answeredCorrect = new Array(questions.length).fill(false);
+
+/* ====== UI BUILD ====== */
+const qNumbersEl = document.getElementById('questionNumbers');
+questions.forEach((_,i)=>{
+  const btn = document.createElement('div');
+  btn.className = 'qnum';
+  btn.id = 'qnum-'+i;
+  btn.textContent = (i+1);
+  btn.onclick = ()=> { showQuestion(i); };
+  qNumbersEl.appendChild(btn);
+});
+
+/* ====== TIMER ====== */
+let timeLeft = 120*60; // seconds
+const timerEl = document.getElementById('timer');
+function startTimer(){
+  updateTimer();
+  const t = setInterval(()=>{
+    timeLeft--;
+    if(timeLeft<0){
+      clearInterval(t);
+      alert("Time's up! Auto-submitting the test.");
+      submitTest();
+    }
+    updateTimer();
+  },1000);
+}
+function updateTimer(){
+  const m = Math.floor(Math.max(0,timeLeft)/60);
+  const s = Math.floor(Math.max(0,timeLeft)%60);
+  timerEl.textContent = `Time Left: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+/* ====== RENDER QUESTION ====== */
+const questionCard = document.getElementById('questionCard');
+const currentIndexEl = document.getElementById('currentIndex');
+
+function renderQuestion(i){
+  const item = questions[i];
+  currentIndexEl.textContent = (i+1);
+  questionCard.innerHTML = `
+    <div class="question-head"><strong>Q${i+1}.</strong> ${item.q}</div>
+    <div class="options" id="options-${i}">
+      ${item.options.map((opt,idx)=>`<button class="opt-btn" id="q${i}opt${idx}" onclick="selectOption(${i},${idx}, this)">${opt}</button>`).join('')}
+    </div>
+    <div style="margin-top:10px;" class="small">Question ${i+1} of ${questions.length}</div>
+  `;
+  // visually mark current in sidebar
+  document.querySelectorAll('.qnum').forEach(n=>n.classList.remove('current'));
+  const currBtn = document.getElementById('qnum-'+i);
+  if(currBtn) currBtn.classList.add('current');
+
+  // mark answered state colors on options if already answered
+  if(userAnswers[i] !== null){
+    const picked = userAnswers[i];
+    const correct = questions[i].answer;
+    const btn = document.getElementById(`q${i}opt${picked}`);
+    if(btn){
+      if(picked === correct){
+        btn.classList.add('correct');
+      } else btn.classList.add('wrong');
+    }
+  }
+}
+
+/* ====== SELECTION LOGIC ====== */
+function selectOption(qIndex, optIndex, btnEl){
+  // ignore if already answered correct
+  if(answeredCorrect[qIndex]) return;
+  const correct = questions[qIndex].answer;
+  userAnswers[qIndex] = optIndex;
+
+  // mark number as answered
+  const numBtn = document.getElementById('qnum-'+qIndex);
+  if(numBtn) numBtn.classList.add('answered');
+
+  if(optIndex === correct){
+    // correct selection
+    btnEl.classList.add('correct');
+    answeredCorrect[qIndex] = true;
+    // auto proceed after short delay (allow user to see green)
+    setTimeout(()=> { 
+      if(qIndex < questions.length-1) showQuestion(qIndex+1);
+      else { /* at end, stay */ }
+    },700);
+  } else {
+    // wrong selection
+    btnEl.classList.add('wrong');
+    // allow user to proceed manually
+  }
+}
+
+/* ====== NAVIGATION & SIDEBAR FUNCTIONS ====== */
+function showQuestion(i){
+  current = i;
+  renderQuestion(i);
+}
+function nextQuestion(){
+  if(current < questions.length-1){
+    current++;
+    showQuestion(current);
+  }
+}
+function prevQuestion(){
+  if(current > 0){
+    current--;
+    showQuestion(current);
+  }
+}
+function toggleFlag(){
+  flagged[current] = !flagged[current];
+  const nbtn = document.getElementById('qnum-'+current);
+  if(flagged[current]) nbtn.classList.add('flagged'); else nbtn.classList.remove('flagged');
+}
+function resetAnswers(){
+  if(!confirm('Reset all answers?')) return;
+  userAnswers = new Array(questions.length).fill(null);
+  answeredCorrect = new Array(questions.length).fill(false);
+  flagged = new Array(questions.length).fill(false);
+  document.querySelectorAll('.qnum').forEach(el=>{ el.classList.remove('answered','flagged','current'); });
+  showQuestion(0);
+}
+
+/* ====== SUBMIT & SCORE ====== */
+function submitTest(){
+  if(!confirm('Submit the test now? You will not be able to change answers after submission.')) return;
+  // compute score
+  let correctCount = 0;
+  for(let i=0;i<questions.length;i++){
+    if(userAnswers[i] === questions[i].answer) correctCount++;
+  }
+  const totalMarks = 150;
+  const marks = (correctCount * totalMarks / questions.length);
+  // show summary (simple)
+  const pct = (marks/totalMarks*100).toFixed(2);
+  alert(`Result:\nCorrect: ${correctCount} / ${questions.length}\nMarks: ${marks.toFixed(2)} / ${totalMarks} (${pct}%)`);
+  // show a results overlay in the page
+  questionCard.innerHTML = `
+    <div style="padding:12px;">
+      <h2>Test Submitted</h2>
+      <p class="small">Correct: <strong>${correctCount}</strong> / ${questions.length}</p>
+      <p class="small">Marks: <strong>${marks.toFixed(2)}</strong> / ${totalMarks}</p>
+      <p class="small">Percentage: <strong>${pct}%</strong></p>
+      <div style="margin-top:12px;"><button class="primary" onclick="downloadResults()">Download Results (CSV)</button> 
+      <button class="ghost" onclick="location.reload()">Reload Test</button></div>
+    </div>
+  `;
+}
+
+/* ====== DOWNLOAD RESULTS ====== */
+function downloadResults(){
+  let csv = 'QNo,Question,SelectedOption,CorrectOption,IsCorrect\n';
+  for(let i=0;i<questions.length;i++){
+    const sel = userAnswers[i]===null ? '' : questions[i].options[userAnswers[i]];
+    const corr = questions[i].options[questions[i].answer];
+    const isC = (userAnswers[i]===questions[i].answer) ? 'Yes' : 'No';
+    const qtext = questions[i].q.replace(/,/g,' ');
+    csv += `${i+1},"${qtext}","${sel}","${corr}",${isC}\n`;
+  }
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sikkim_mock_results.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ====== INIT ====== */
+showQuestion(0);
+startTimer();
+
+</script>
+</body>
+</html>
