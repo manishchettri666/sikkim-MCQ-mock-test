@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Mock Test — 150 Marks | 2 Hours</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    --bg: #f6f7fb;
+    --card: #fff;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --accent: #3b82f6;
+    --ok: #16a34a;
+    --bad: #dc2626;
+    --ring: #e5e7eb;
+  }
+  *{box-sizing: border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
+  .app{
+    display:grid; grid-template-columns: 260px 1fr; gap:16px;
+    max-width: 1200px; margin: 24px auto; padding: 0 16px;
+  }
+  .panel{
+    background:var(--card); border:1px solid var(--ring); border-radius:14px;
+    box-shadow:0 2px 14px rgba(0,0,0,.04);
+  }
+  .sidebar{
+    padding:14px;
+    display:flex; flex-direction:column; gap:12px;
+    position:sticky; top:16px; max-height: calc(100vh - 32px); overflow:auto;
+  }
+  .legend{ display:flex; gap:8px; flex-wrap:wrap; font-size:12px; color:var(--muted)}
+  .dot{width:9px; height:9px; border-radius:50%;}
+  .qgrid{
+    display:grid; grid-template-columns: repeat(5, 1fr); gap:8px;
+  }
+  .qbtn{
+    border:1px solid var(--ring); background:#fafafa; color:#111827;
+    border-radius:10px; padding:8px 0; font-weight:600; text-align:center; cursor:pointer;
+    transition: all .12s ease;
+  }
+  .qbtn:hover{ background:#f3f4f6 }
+  .qbtn.active{ outline:2px solid var(--accent); background:#eff6ff }
+  .qbtn.answered{ background:#dcfce7; border-color:#bbf7d0 }       /* answered (any) */
+  .qbtn.correct{ background:#dcfce7; border-color:#86efac }        /* correct */
+  .qbtn.wrong{ background:#fee2e2; border-color:#fecaca }          /* wrong */
+
+  .main{ padding:18px }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding-bottom:14px; border-bottom:1px solid var(--ring);
+  }
+  .title{ font-size:18px; font-weight:800 }
+  .meta{ display:flex; gap:12px; flex-wrap:wrap; color:var(--muted) }
+  .timer{
+    font:700 18px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    color:#ef4444; background:#fee2e2; border:1px solid #fecaca; padding:8px 12px; border-radius:10px;
+  }
+  .content{ padding:18px 6px }
+  .qtext{ font-size:18px; font-weight:600; margin-bottom:14px }
+  .options{ display:flex; flex-direction:column; gap:10px }
+  .opt{
+    border:1px solid var(--ring); background:#fff; border-radius:12px; padding:12px 14px;
+    cursor:pointer; text-align:left; transition: all .12s ease; user-select:none;
+  }
+  .opt:hover{ background:#f9fafb }
+  .opt.correct{ background:#16a34a; color:#fff; border-color:#15803d }
+  .opt.wrong{ background:#dc2626; color:#fff; border-color:#b91c1c }
+  .opt.disabled{ pointer-events:none; opacity:.9 }
+  .nav{
+    display:flex; justify-content:space-between; gap:10px; margin-top:18px
+  }
+  .btn{
+    background:var(--accent); color:#fff; border:0; border-radius:10px;
+    padding:10px 16px; cursor:pointer; font-weight:700;
+  }
+  .btn[disabled]{ opacity:.5; cursor:not-allowed }
+  .summary{
+    display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; color:var(--muted); font-size:14px;
+  }
+  .footer{
+    border-top:1px solid var(--ring); padding-top:12px; margin-top:18px; color:var(--muted); font-size:13px;
+  }
+  @media (max-width: 900px){
+    .app{ grid-template-columns: 1fr }
+    .sidebar{ position:static; max-height:none }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar with question numbers -->
+  <aside class="sidebar panel">
+    <div class="title">Question Tracker</div>
+    <div class="legend">
+      <span class="dot" style="background:#e5e7eb; border:1px solid #cbd5e1"></span> Not visited
+      <span class="dot" style="background:#dcfce7; border:1px solid #86efac"></span> Answered
+      <span class="dot" style="background:#fee2e2; border:1px solid #fecaca"></span> Wrong
+      <span class="dot" style="background:#eff6ff; border:1px solid #93c5fd"></span> Current
+    </div>
+    <div id="qgrid" class="qgrid"></div>
+  </aside>
+
+  <!-- Main area -->
+  <main class="main panel">
+    <div class="topbar">
+      <div>
+        <div class="title">General Mock Test</div>
+        <div class="meta">
+          <span id="progress">Q 1 / 75</span>
+          <span>Marks: 150 (2 each)</span>
+          <span>Duration: 2:00:00</span>
+        </div>
+      </div>
+      <div id="timer" class="timer">02:00:00</div>
+    </div>
+
+    <div class="content">
+      <div id="qtext" class="qtext"></div>
+      <div id="options" class="options"></div>
+
+      <div class="nav">
+        <button id="prevBtn" class="btn" type="button">◀ Prev</button>
+        <button id="nextBtn" class="btn" type="button">Next ▶</button>
+      </div>
+
+      <div class="summary" id="summary"></div>
+
+      <div class="footer">
+        Tip: Click numbers in the left panel to jump to any question. Once you answer,
+        options are locked and immediate feedback is shown (green/red). You can still
+        navigate with Prev/Next to review.
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+/* ========== CONFIG ========== */
+const TOTAL_TIME_SEC = 2 * 60 * 60; // 2 hours
+const QUESTIONS_PER_MARK = 2;        // each question = 2 marks
+const AUTO_ADVANCE_MS = 900;
+
+/* ========== QUESTION BANK (75 MCQs) ========== */
+/* Each item: { q: "text", opts: ["A","B","C","D"], ans: index } */
+const questions = [
+  // ---- Section 1: Current Events (Sikkim + National + International) - 10 Qs ----
+  { q: "Who is the current Chief Minister of Sikkim (2025)?", opts: ["Pawan Kumar Chamling","Prem Singh Tamang","Kazi Lhendup Dorjee","Narendra Modi"], ans: 1 },
+  { q: "Which district of Sikkim was formed in 2021?", opts: ["Pakyong","Namchi","Soreng","Mangan"], ans: 0 },
+  { q: "Sikkim shares an international border with how many countries?", opts: ["1","2","3","4"], ans: 2 },
+  { q: "Which country hosted the 2024 Summer Olympics?", opts: ["France","USA","Japan","China"], ans: 0 },
+  { q: "COP29 (2024) was held in which country?", opts: ["Brazil","Azerbaijan","India","UAE"], ans: 1 },
+  { q: "Which Indian state is the largest producer of cardamom?", opts: ["Kerala","Sikkim","Assam","Nagaland"], ans: 1 },
+  { q: "India is the world’s ___ largest economy in 2024.", opts: ["2nd","3rd","4th","5th"], ans: 1 },
+  { q: "The G20 Summit 2023 was hosted in?", opts: ["New Delhi","Tokyo","Paris","Beijing"], ans: 0 },
+  { q: "Who is the current President of India (2025)?", opts: ["Ram Nath Kovind","Pratibha Patil","Droupadi Murmu","APJ Abdul Kalam"], ans: 2 },
+  { q: "Which space agency landed humans on the Moon again in 2024?", opts: ["NASA","ISRO","ESA","Roscosmos"], ans: 0 },
+
+  // ---- Section 2: History of India & National Movement - 10 Qs ----
+  { q: "Who was the first Governor-General of independent India?", opts: ["Lord Mountbatten","C. Rajagopalachari","Dr. Rajendra Prasad","Jawaharlal Nehru"], ans: 0 },
+  { q: "The Non-Cooperation Movement started in which year?", opts: ["1919","1920","1921","1922"], ans: 1 },
+  { q: "Who founded the Indian National Congress?", opts: ["A.O. Hume","Dadabhai Naoroji","M.G. Ranade","Motilal Nehru"], ans: 0 },
+  { q: "The Quit India Movement was launched in?", opts: ["1939","1940","1942","1945"], ans: 2 },
+  { q: "Who was known as 'Grand Old Man of India'?", opts: ["Bal Gangadhar Tilak","Dadabhai Naoroji","Mahatma Gandhi","Gopal Krishna Gokhale"], ans: 1 },
+  { q: "The Battle of Plassey was fought in?", opts: ["1757","1761","1857","1799"], ans: 0 },
+  { q: "Subhash Chandra Bose gave the slogan?", opts: ["Swaraj is my birthright","Jai Hind","Do or Die","Inquilab Zindabad"], ans: 1 },
+  { q: "Who was the first President of Indian National Congress?", opts: ["W.C. Bonnerjee","Mahatma Gandhi","Dadabhai Naoroji","Motilal Nehru"], ans: 0 },
+  { q: "Who wrote 'Discovery of India'?", opts: ["Rabindranath Tagore","Jawaharlal Nehru","Mahatma Gandhi","B.R. Ambedkar"], ans: 1 },
+  { q: "Who was the Viceroy during the 1857 Revolt?", opts: ["Lord Dalhousie","Lord Canning","Lord Curzon","Lord Ripon"], ans: 1 },
+
+  // ---- Section 3: Polity & Governance - 10 Qs ----
+  { q: "Right to Education Act was passed in?", opts: ["2009","2010","2005","2008"], ans: 0 },
+  { q: "Who is the head of the Rajya Sabha?", opts: ["President","Vice President","Prime Minister","Speaker"], ans: 1 },
+  { q: "Which Article provides Right to Constitutional Remedies?", opts: ["Article 14","Article 19","Article 32","Article 21"], ans: 2 },
+  { q: "How many Fundamental Duties are listed in the Constitution?", opts: ["9","10","11","12"], ans: 2 },
+  { q: "Minimum age to be President of India is?", opts: ["25","30","35","40"], ans: 2 },
+  { q: "Father of the Indian Constitution?", opts: ["Jawaharlal Nehru","Dr. B.R. Ambedkar","Sardar Patel","Rajendra Prasad"], ans: 1 },
+  { q: "Which body conducts elections in India?", opts: ["Parliament","Election Commission","Supreme Court","Lok Sabha"], ans: 1 },
+  { q: "Emergency provisions are in which Part?", opts: ["Part XVI","Part XVIII","Part XIX","Part XXI"], ans: 1 },
+  { q: "Money Bill can be introduced only in?", opts: ["Rajya Sabha","Lok Sabha","Either House","Supreme Court"], ans: 1 },
+  { q: "The Supreme Court of India was established in?", opts: ["1947","1950","1952","1960"], ans: 1 },
+
+  // ---- Section 4: Economic & Social Developments - 10 Qs ----
+  { q: "Which scheme is related to financial inclusion?", opts: ["PMJDY","PMAY","MGNREGA","Ayushman Bharat"], ans: 0 },
+  { q: "GDP stands for?", opts: ["Gross Domestic Product","Gross Development Plan","General Domestic Product","Global Development Policy"], ans: 0 },
+  { q: "Largest employer in India?", opts: ["Railways","Defense","Agriculture","IT Sector"], ans: 2 },
+  { q: "Who presents the Union Budget in India?", opts: ["Prime Minister","Finance Minister","President","RBI Governor"], ans: 1 },
+  { q: "NITI Aayog replaced which body?", opts: ["Planning Commission","Finance Commission","Election Commission","HRD Ministry"], ans: 0 },
+  { q: "State with highest literacy rate?", opts: ["Sikkim","Kerala","Goa","Tamil Nadu"], ans: 1 },
+  { q: "MSME stands for?", opts: ["Micro, Small & Medium Enterprises","Micro Social Market Economy","Medium Scale Manufacturing Enterprises","None"], ans: 0 },
+  { q: "PM-KISAN provides income support to?", opts: ["Industrialists","Farmers","Students","Workers"], ans: 1 },
+  { q: "Unemployment caused by seasonal changes is called?", opts: ["Cyclical","Frictional","Structural","Seasonal"], ans: 3 },
+  { q: "Which organization releases the Human Development Index?", opts: ["UNDP","IMF","World Bank","WTO"], ans: 0 },
+
+  // ---- Section 5: Law, Order & Internal Security - 8 Qs ----
+  { q: "NIA stands for?", opts: ["National Investigation Agency","National Internal Agency","National Industrial Authority","National Information Agency"], ans: 0 },
+  { q: "Which force guards India’s borders with China?", opts: ["CRPF","ITBP","BSF","CISF"], ans: 1 },
+  { q: "Which Article deals with Preventive Detention?", opts: ["21","22","19","32"], ans: 1 },
+  { q: "Which law deals with cybercrimes in India?", opts: ["IT Act 2000","IPC","Evidence Act","Cyber Law Act"], ans: 0 },
+  { q: "India’s apex external intelligence agency?", opts: ["RAW","CBI","NIA","CID"], ans: 0 },
+  { q: "BSF guards India’s borders with?", opts: ["Nepal","Bhutan","Pakistan & Bangladesh","China"], ans: 2 },
+  { q: "Which Indian state has AFSPA in force?", opts: ["Maharashtra","Nagaland","Punjab","Kerala"], ans: 1 },
+  { q: "The Chief of Army is appointed by?", opts: ["Parliament","Prime Minister","President","Cabinet"], ans: 2 },
+
+  // ---- Section 6: Basics of Computer Science - 7 Qs ----
+  { q: "Which of these is an input device?", opts: ["Printer","Keyboard","Monitor","Speaker"], ans: 1 },
+  { q: "Binary of decimal 10 is?", opts: ["1010","1110","1001","1011"], ans: 0 },
+  { q: "Full form of HTTP?", opts: ["Hyper Text Transfer Protocol","High Tech Transfer Protocol","Hyperlink Text Transfer Protocol","None"], ans: 0 },
+  { q: "Which is not an operating system?", opts: ["Linux","Windows","Python","macOS"], ans: 2 },
+  { q: "Ctrl + C is used for?", opts: ["Copy","Paste","Cut","Undo"], ans: 0 },
+  { q: "The brain of the computer is?", opts: ["RAM","ROM","CPU","GPU"], ans: 2 },
+  { q: "Which storage is permanent?", opts: ["RAM","ROM","Cache","Register"], ans: 1 },
+
+  // ---- Section 7: General Science (Class X) - 10 Qs ----
+  { q: "Vitamin C is also called?", opts: ["Ascorbic acid","Niacin","Retinol","Calciferol"], ans: 0 },
+  { q: "Water boils at what Celsius?", opts: ["90","100","120","80"], ans: 1 },
+  { q: "H2SO4 is commonly called?", opts: ["Hydrochloric Acid","Nitric Acid","Sulphuric Acid","Carbonic Acid"], ans: 2 },
+  { q: "Force = ?", opts: ["Mass × Velocity","Mass × Acceleration","Work × Time","Energy / Time"], ans: 1 },
+  { q: "Which planet is known as the Red Planet?", opts: ["Mars","Venus","Jupiter","Mercury"], ans: 0 },
+  { q: "Which gas is used in photosynthesis?", opts: ["CO2","O2","N2","H2"], ans: 0 },
+  { q: "SI unit of Power is?", opts: ["Watt","Joule","Newton","Pascal"], ans: 0 },
+  { q: "Which part of plant carries food?", opts: ["Xylem","Phloem","Root","Leaf"], ans: 1 },
+  { q: "Largest bone in human body?", opts: ["Femur","Tibia","Fibula","Humerus"], ans: 0 },
+  { q: "DNA stands for?", opts: ["Deoxyribonucleic Acid","Dinucleic Acid","Deoxyribose Acid","None"], ans: 0 },
+
+  // ---- Section 8: General English (Class X) - 10 Qs ----
+  { q: "Choose the correct spelling:", opts: ["Enviroment","Environment","Environmant","Enviorment"], ans: 1 },
+  { q: "Antonym of 'Brave'?", opts: ["Coward","Fearless","Strong","Bold"], ans: 0 },
+  { q: "Synonym of 'Happy'?", opts: ["Sad","Joyful","Angry","Weak"], ans: 1 },
+  { q: "Fill in the blank: She ___ to school every day.", opts: ["go","goes","gone","going"], ans: 1 },
+  { q: "Plural of 'Mouse'?", opts: ["Mouses","Mice","Mices","Mouse"], ans: 1 },
+  { q: "Past tense of 'Write'?", opts: ["Written","Writes","Wrote","Writing"], ans: 2 },
+  { q: "Choose the correct sentence:", opts: ["He go to market","He goes to market","He going to market","He gone to market"], ans: 1 },
+  { q: "Antonym of 'Victory'?", opts: ["Lose","Defeat","Loss","Failure"], ans: 1 },
+  { q: "Synonym of 'Begin'?", opts: ["End","Start","Finish","Close"], ans: 1 },
+  { q: "Identify the adjective: The sky is blue.", opts: ["Sky","Blue","Is","The"], ans: 1 }
+];
+
+const TOTAL_Q = questions.length;
+
+/* ========== STATE ========== */
+let current = 0;
+let answered = Array(TOTAL_Q).fill(null); // stores chosen index (0-3) or null
+let verdict = Array(TOTAL_Q).fill(null);  // "correct" | "wrong" | null
+let timeLeft = TOTAL_TIME_SEC;
+let timerId = null;
+
+/* ========== DOM HOOKS ========== */
+const qgrid = document.getElementById('qgrid');
+const qtext = document.getElementById('qtext');
+const optionsEl = document.getElementById('options');
+const progressEl = document.getElementById('progress');
+const timerEl = document.getElementById('timer');
+const summaryEl = document.getElementById('summary');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+/* ========== BUILD SIDEBAR BUTTONS ========== */
+for (let i = 0; i < TOTAL_Q; i++) {
+  const b = document.createElement('button');
+  b.className = 'qbtn';
+  b.textContent = String(i+1);
+  b.addEventListener('click', () => {
+    current = i;
+    render();
+  });
+  qgrid.appendChild(b);
+}
+
+/* ========== TIMER ========== */
+function startTimer(){
+  formatTimer();
+  timerId = setInterval(()=>{
+    timeLeft--;
+    if(timeLeft <= 0){
+      clearInterval(timerId);
+      finish();
+    } else {
+      formatTimer();
+    }
+  },1000);
+}
+function formatTimer(){
+  const h = Math.floor(timeLeft / 3600);
+  const m = Math.floor((timeLeft % 3600) / 60);
+  const s = timeLeft % 60;
+  timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+/* ========== RENDER QUESTION ========== */
+function render(){
+  // progress
+  progressEl.textContent = `Q ${current+1} / ${TOTAL_Q}`;
+
+  // sidebar states
+  [...qgrid.children].forEach((btn, idx)=>{
+    btn.classList.remove('active','answered','correct','wrong');
+    if (idx === current) btn.classList.add('active');
+    if (answered[idx] !== null) {
+      btn.classList.add('answered');
+      if (verdict[idx] === 'correct') btn.classList.add('correct');
+      if (verdict[idx] === 'wrong') btn.classList.add('wrong');
+    }
+  });
+
+  // question text & options
+  const item = questions[current];
+  qtext.textContent = item.q;
+  optionsEl.innerHTML = '';
+  item.opts.forEach((opt, i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.textContent = opt;
+
+    // if already answered, lock and colorize
+    const chosen = answered[current];
+    if (chosen !== null){
+      div.classList.add('disabled');
+      if (i === item.ans) div.classList.add('correct');
+      if (i === chosen && chosen !== item.ans) div.classList.add('wrong');
+    } else {
+      // click to answer
+      div.addEventListener('click', ()=>{
+        handleAnswer(i);
+      });
+    }
+    optionsEl.appendChild(div);
+  });
+
+  // navigation buttons
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === TOTAL_Q - 1;
+}
+
+/* ========== ANSWER HANDLER ========== */
+function handleAnswer(choiceIdx){
+  const item = questions[current];
+  answered[current] = choiceIdx;
+  const correct = (choiceIdx === item.ans);
+  verdict[current] = correct ? 'correct' : 'wrong';
+
+  // paint options
+  [...optionsEl.children].forEach((el, idx)=>{
+    el.classList.add('disabled');
+    if (idx === item.ans) el.classList.add('correct');
+    if (idx === choiceIdx && !correct) el.classList.add('wrong');
+  });
+
+  // update sidebar cell now
+  const cell = qgrid.children[current];
+  cell.classList.add('answered');
+  cell.classList.remove('correct','wrong');
+  cell.classList.add(correct ? 'correct' : 'wrong');
+
+  // auto-advance
+  setTimeout(()=>{
+    if (current < TOTAL_Q - 1){
+      current++;
+      render();
+    } else {
+      finish();
+    }
+  }, AUTO_ADVANCE_MS);
+}
+
+/* ========== NAVIGATION BUTTONS ========== */
+prevBtn.addEventListener('click', ()=>{
+  if (current > 0){ current--; render(); }
+});
+nextBtn.addEventListener('click', ()=>{
+  if (current < TOTAL_Q - 1){ current++; render(); }
+});
+
+/* ========== FINISH & SCORE ========== */
+function finish(){
+  // lock everything
+  clearInterval(timerId);
+
+  const correctCount = verdict.filter(v => v === 'correct').length;
+  const marks = correctCount * QUESTIONS_PER_MARK;
+
+  // summary text
+  summaryEl.innerHTML =
+    `✅ <strong>Test Completed.</strong> Score: <strong>${marks}/150</strong> ` +
+    `(${correctCount}/${TOTAL_Q} correct).`;
+
+  // show a simple alert too
+  setTimeout(()=>{
+    alert(`Exam Finished!\nCorrect: ${correctCount}/${TOTAL_Q}\nMarks: ${marks}/150`);
+  }, 20);
+
+  // disable interactions
+  prevBtn.disabled = true; nextBtn.disabled = true;
+  [...optionsEl.children].forEach(el => el.classList.add('disabled'));
+}
+
+/* ========== INIT ========== */
+startTimer();
+render();
+</script>
+</body>
+</html>
